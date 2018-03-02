@@ -84,18 +84,24 @@ public class SdvReader {
   }
 
   public <T> T parseDocument(Path path, Class<T> documentType) throws IOException {
-    try {
-      return parseDocument(path.toUri().toURL(), documentType);
-    }
-    catch (MalformedURLException e) {
-      throw new SdvParsingException(e);
-    }
+    return parseDocument(pathToUrl(path), documentType);
   }
 
-  public <T> T parseDocument(URL path, Class<T> documentType) throws IOException {
-    SdvRowCollector<T> collector = new SdvRowCollector(documentType);
+  public <T> T parseDocument(Path path, T document) throws IOException {
+    return parseDocument(pathToUrl(path), document);
+  }
+
+  public <T> T parseDocument(URL url, Class<T> documentType) throws IOException {
+    return parseDocument(url, new SdvRowCollector<>(documentType));
+  }
+
+  public <T> T parseDocument(URL url, T document) throws IOException {
+    return parseDocument(url, new SdvRowCollector<>(document));
+  }
+
+  private <T> T parseDocument(URL url, SdvRowCollector<T> collector) throws IOException {
     collector.registerRowBeanTypes(this);
-    try (SdvRowIterator<?> iter = iterate(path, Object.class)) {
+    try (SdvRowIterator<?> iter = iterate(url, Object.class)) {
       while (iter.hasNext()) {
         collector.newRow(iter.next());
       }
@@ -108,12 +114,7 @@ public class SdvReader {
   }
 
   public <T> List<T> parse(Path path, Class<T> rowFilterType) throws IOException {
-    try {
-      return parse(path.toUri().toURL(), rowFilterType);
-    }
-    catch (MalformedURLException e) {
-      throw new SdvParsingException(e);
-    }
+    return parse(pathToUrl(path), rowFilterType);
   }
 
   public List<?> parse(URL url) throws IOException {
@@ -182,6 +183,15 @@ public class SdvReader {
 
   public SdvTypeConverterWithFormat<?, ? extends Annotation> getConverterWithFormat(Class<?> type) {
     return this.convertersWithFormat.get(type);
+  }
+
+  private static URL pathToUrl(Path path) {
+    try {
+      return path.toUri().toURL();
+    }
+    catch (MalformedURLException e) {
+      throw new SdvParsingException(e);
+    }
   }
 
 }

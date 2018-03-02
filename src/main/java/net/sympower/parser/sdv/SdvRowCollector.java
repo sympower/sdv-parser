@@ -20,13 +20,12 @@ public class SdvRowCollector<T> {
   private final HashMap<Class<?>, Collection> handlerCollections = new HashMap<>();
 
   SdvRowCollector(Class<T> documentType) {
-    try {
-      this.document = documentType.newInstance();
-    }
-    catch (InstantiationException | IllegalAccessException e) {
-      throw new SdvParsingReflectionException(
-        String.format("Error while invoking constructor on class %s", documentType), e);
-    }
+    this(makeDoc(documentType));
+  }
+
+  SdvRowCollector(T document) {
+    this.document = document;
+    Class<T> documentType = (Class<T>) document.getClass();
     for (Method method : documentType.getMethods()) {
       if (method.getName().startsWith(SETTER_PREFIX) || method.getName().startsWith(ADD_PREFIX)) {
         registerMethod(method);
@@ -38,6 +37,16 @@ public class SdvRowCollector<T> {
     for (Field field : documentType.getDeclaredFields()) {
       field.setAccessible(true);
       registerField(field);
+    }
+  }
+
+  private static <T> T makeDoc(Class<T> documentType) {
+    try {
+      return documentType.newInstance();
+    }
+    catch (InstantiationException | IllegalAccessException e) {
+      throw new SdvParsingReflectionException(
+        String.format("Error while invoking constructor on class %s", documentType), e);
     }
   }
 
