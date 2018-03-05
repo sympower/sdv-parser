@@ -2,7 +2,9 @@ package net.sympower.parser.sdv;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -99,9 +101,29 @@ public class SdvReader {
     return parseDocument(url, new SdvRowCollector<>(document));
   }
 
+  public <T> T parseDocument(InputStream is, Class<T> documentType) throws IOException {
+    return parseDocument(() -> iterate(is, Object.class), new SdvRowCollector<>(documentType));
+  }
+
+  public <T> T parseDocument(InputStream is, T document) throws IOException {
+    return parseDocument(() -> iterate(is, Object.class), new SdvRowCollector<>(document));
+  }
+
+  public <T> T parseDocument(Reader reader, Class<T> documentType) throws IOException {
+    return parseDocument(() -> iterate(reader, Object.class), new SdvRowCollector<>(documentType));
+  }
+
+  public <T> T parseDocument(Reader reader, T document) throws IOException {
+    return parseDocument(() -> iterate(reader, Object.class), new SdvRowCollector<>(document));
+  }
+
   private <T> T parseDocument(URL url, SdvRowCollector<T> collector) throws IOException {
+    return parseDocument(() -> iterate(url, Object.class), collector);
+  }
+
+  private <T> T parseDocument(SupplierWithIOException<SdvRowIterator<?>> iteratorSupplier, SdvRowCollector<T> collector) throws IOException {
     collector.registerRowBeanTypes(this);
-    try (SdvRowIterator<?> iter = iterate(url, Object.class)) {
+    try (SdvRowIterator<?> iter = iteratorSupplier.get()) {
       while (iter.hasNext()) {
         collector.newRow(iter.next());
       }
@@ -122,11 +144,21 @@ public class SdvReader {
   }
 
   public <T> List<T> parse(URL url, Class<T> rowFilterType) throws IOException {
+    return parse(() -> iterate(url, rowFilterType));
+  }
+
+  public <T> List<T> parse(InputStream is, Class<T> rowFilterType) throws IOException {
+    return parse(() -> iterate(is, rowFilterType));
+  }
+
+  public <T> List<T> parse(Reader reader, Class<T> rowFilterType) throws IOException {
+    return parse(() -> iterate(reader, rowFilterType));
+  }
+
+  private <T> List<T> parse(SupplierWithIOException<SdvRowIterator<T>> iteratorSupplier) throws IOException {
     ArrayList<T> rows = new ArrayList<>();
-    try (SdvRowIterator<T> iter = iterate(url, rowFilterType)) {
-      while (iter.hasNext()) {
-        rows.add(iter.next());
-      }
+    try (SdvRowIterator<T> iter = iteratorSupplier.get()) {
+      iter.forEachRemaining(rows::add);
     }
     return rows;
   }
@@ -136,8 +168,16 @@ public class SdvReader {
   }
 
   public <T> SdvRowIterator<T> iterate(URL url, Class<T> rowFilterType) throws IOException {
+    return iterate(url.openStream(), rowFilterType);
+  }
+
+  public <T> SdvRowIterator<T> iterate(InputStream is, Class<T> rowFilterType) throws IOException {
+    return iterate(new InputStreamReader(is, this.charset), rowFilterType);
+  }
+
+  public <T> SdvRowIterator<T> iterate(Reader reader, Class<T> rowFilterType) throws IOException {
     setConverterDefaults();
-    return new SdvRowIterator<>(this, COMMENT_PREFIX, columnDelimiterPattern, new BufferedReader(new InputStreamReader(url.openStream(), this.charset)), rowFilterType);
+    return new SdvRowIterator<>(this, COMMENT_PREFIX, columnDelimiterPattern, new BufferedReader(reader), rowFilterType);
   }
 
   private void setConverterDefaults() {
