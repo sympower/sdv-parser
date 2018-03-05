@@ -27,9 +27,11 @@ public class SdvRowCollector<T> {
     this.document = document;
     Class<T> documentType = (Class<T>) document.getClass();
     for (Method method : documentType.getMethods()) {
-      if (method.getName().startsWith(SETTER_PREFIX) || method.getName().startsWith(ADD_PREFIX)) {
-        registerMethod(method);
-      }
+      registerMethod(method);
+    }
+    for (Method method : documentType.getDeclaredMethods()) {
+      method.setAccessible(true);
+      registerMethod(method);
     }
     for (Field field : documentType.getFields()) {
       registerField(field);
@@ -51,13 +53,21 @@ public class SdvRowCollector<T> {
   }
 
   private void registerMethod(Method method) {
-    Class<?>[] parameterTypes = method.getParameterTypes();
-    if (parameterTypes.length == 1) {
-      handlerMethods.put(parameterTypes[0], method);
+    if (method.getDeclaredAnnotation(SdvIgnore.class) != null) {
+      return;
+    }
+    if (method.getName().startsWith(SETTER_PREFIX) || method.getName().startsWith(ADD_PREFIX)) {
+      Class<?>[] parameterTypes = method.getParameterTypes();
+      if (parameterTypes.length == 1) {
+        handlerMethods.put(parameterTypes[0], method);
+      }
     }
   }
 
   private void registerField(Field field) {
+    if (field.getDeclaredAnnotation(SdvIgnore.class) != null) {
+      return;
+    }
     if (Collection.class.isAssignableFrom(field.getType())) {
       try {
         Collection collection = (Collection) field.get(document);

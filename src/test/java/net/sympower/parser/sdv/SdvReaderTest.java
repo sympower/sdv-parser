@@ -123,6 +123,7 @@ public class SdvReaderTest {
     SpotPriceDocument doc = sut.parseDocument(getClass().getResource("prices.sdv"), SpotPriceDocument.class);
     assertNotNull("Should have last updated row", doc.lastUpdated);
     assertLastUpdatedRow(Arrays.asList(doc.lastUpdated).iterator());
+    assertTrue("Last updated should have been set via a method call", doc.lastUpdatedSetViaMethod);
     assertNotNull("Should have areas", doc.areas);
     Iterator<AreaDescriptionRow> areaIter = doc.areas.iterator();
     assertAreaEquals("FRE", "Finnish-Russian Exchange Bidding Area", areaIter);
