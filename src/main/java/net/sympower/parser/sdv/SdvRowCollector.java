@@ -100,11 +100,6 @@ public class SdvRowCollector<T> {
   }
 
   void newRow(Object o) {
-    Collection collection = handlerCollections.get(o.getClass());
-    if (collection != null) {
-      collection.add(o);
-      return;
-    }
     Method method = handlerMethods.get(o.getClass());
     if (method != null) {
       try {
@@ -115,6 +110,11 @@ public class SdvRowCollector<T> {
         throw new SdvParsingReflectionException(
           String.format("Error while invoking method %s on class %s", method.getName(), document.getClass()), e);
       }
+    }
+    Collection collection = handlerCollections.get(o.getClass());
+    if (collection != null) {
+      collection.add(o);
+      return;
     }
     Field field = handlerSimpleFields.get(o.getClass());
     if (field != null) {

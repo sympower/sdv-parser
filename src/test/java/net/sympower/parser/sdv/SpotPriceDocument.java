@@ -9,6 +9,7 @@ public class SpotPriceDocument {
   @SdvIgnore public boolean lastUpdatedSetViaMethod = false;
   List<AreaDescriptionRow> areas;
   public final ArrayList<PricesRow> prices = new ArrayList<>();
+  @SdvIgnore public boolean priceAddedViaMethod = false;
   LineCountRow lineCount;
 
   private void setLastUpdated(LastUpdatedRow lastUpdated) {
@@ -18,6 +19,7 @@ public class SpotPriceDocument {
 
   public void addPrice(PricesRow price) {
     this.prices.add(price);
+    this.priceAddedViaMethod = true;
   }
 
   @SdvIgnore

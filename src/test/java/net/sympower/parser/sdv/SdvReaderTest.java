@@ -131,6 +131,7 @@ public class SdvReaderTest {
     assertFalse("Should not have more area rows", areaIter.hasNext());
     Iterator<PricesRow> priceIter = doc.prices.iterator();
     assertPriceRows(priceIter);
+    assertTrue("Prices should have been added via a method call", doc.priceAddedViaMethod);
     assertFalse("Should not have more price rows", priceIter.hasNext());
     assertNotNull("Should have line count row", doc.lineCount);
     assertLineCountRow(223, Arrays.asList(doc.lineCount).iterator());

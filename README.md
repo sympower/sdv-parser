@@ -92,9 +92,9 @@ The document class does not need to be annotated in any way. It should have a no
 
 The rules that the parser follows when collecting rows to a document:
 
-* if there is a field with collection type, that is used (if the field has no initial value, it is initialized with `ArrayList`)
-* if there is a `set*()` or `add*()` method with a single parameter, that is used
-* if there is a field with non-collection type, that is used
+1. if there is a `set*()` or `add*()` method with a single parameter, that is used
+1. if there is a field with collection type, that is used (if the field has no initial value, it is initialized with `ArrayList`)
+1. if there is a field with non-collection type, that is used
 
 In case there are multiple rows of same type but the document can contain only single value of that type
 (e.g. a field or a setter method), the last row in the file wins.
