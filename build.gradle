@@ -4,28 +4,32 @@ buildscript {
     }
 }
 
+plugins {
+    id 'maven-publish'
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'maven'
 
 group 'net.sympower'
-version =  '1.0.0-SNAPSHOT'
+archivesBaseName = 'sdv-parser'
+version = '1.0.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+java {
+    withSourcesJar()
+}
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
 
-jar {
-    baseName = 'sdv-parser'
-}
-
 dependencies {
-    testCompile("junit:junit:4.12")
+    testImplementation("junit:junit:4.12")
 }
 
 test {
