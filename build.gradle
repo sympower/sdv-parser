@@ -1,6 +1,25 @@
 buildscript {
     repositories {
-        mavenCentral()
+        mavenLocal()
+        maven {
+            url uri(project.properties.sympowerMavenRepoPublicUrl)
+            credentials {
+                username "$sympowerMavenRepoUsername"
+                password "$sympowerMavenRepoPassword"
+            }
+        }
+    }
+    dependencies {
+        // A plugin that will virtually set project versions, based on current Git branch or Git tag.
+        // The build.gradle files will not be modified, versions are modified in memory only.
+        //
+        // The version resolution configuration can be tested on command line for example by:
+        //    gradle :version -q
+        // or
+        //    gradle :version -q -Pgit.branch=feature/test-it
+        //
+        // https://github.com/qoomon/gradle-git-versioning-plugin
+        classpath "me.qoomon:gradle-git-versioning-plugin:1.2.3"
     }
 }
 
@@ -11,6 +30,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: "me.qoomon.git-versioning"
 
 group 'net.sympower'
 archivesBaseName = 'sdv-parser'
@@ -25,7 +45,13 @@ java {
 
 repositories {
     mavenLocal()
-    mavenCentral()
+    maven {
+        url uri(project.properties.sympowerMavenRepoPublicUrl)
+        credentials {
+            username "$sympowerMavenRepoUsername"
+            password "$sympowerMavenRepoPassword"
+        }
+    }
 }
 
 ext {
@@ -44,5 +70,51 @@ test {
         showStandardStreams = true
         events "passed", "skipped", "failed"
         exceptionFormat "full"
+    }
+}
+
+gitVersioning {
+    branch {
+        // Matches the "master" branch and uses the "project.version" that is currently specified in the build.gradle file
+        pattern = 'master'
+        versionFormat = '${version}'
+    }
+    branch {
+        // Matches all branches except "master" and uses the branch name and "-SNAPSHOT" suffix for the "project.version"
+        pattern = '^((?!master$).*)'
+        versionFormat = '${1}-SNAPSHOT'
+    }
+    commit {
+        // Fallback in case git branch information is not available (detached HEAD or no match with the branch patterns above)
+        versionFormat = '${commit.short}'
+    }
+}
+
+publishing {
+    publications {
+        "$project.name"(MavenPublication) {
+            groupId project.group
+            artifactId project.archivesBaseName
+            from components.java
+
+            // https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:resolved_dependencies
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username "$sympowerMavenRepoUsername"
+                password "$sympowerMavenRepoPassword"
+            }
+            url = version.endsWith('SNAPSHOT') ? "${sympowerMavenRepoSnapshotsUrl}" : "${sympowerMavenRepoReleasesUrl}"
+        }
     }
 }
