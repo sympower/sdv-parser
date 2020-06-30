@@ -1,13 +1,7 @@
 buildscript {
     repositories {
         mavenLocal()
-        maven {
-            url uri(project.properties.sympowerMavenRepoPublicUrl)
-            credentials {
-                username "$sympowerMavenRepoUsername"
-                password "$sympowerMavenRepoPassword"
-            }
-        }
+        mavenCentral()
     }
     dependencies {
         // A plugin that will virtually set project versions, based on current Git branch or Git tag.
@@ -45,13 +39,7 @@ java {
 
 repositories {
     mavenLocal()
-    maven {
-        url uri(project.properties.sympowerMavenRepoPublicUrl)
-        credentials {
-            username "$sympowerMavenRepoUsername"
-            password "$sympowerMavenRepoPassword"
-        }
-    }
+    mavenCentral()
 }
 
 ext {
