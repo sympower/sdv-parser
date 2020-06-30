@@ -28,7 +28,7 @@ apply plugin: "me.qoomon.git-versioning"
 
 group 'net.sympower'
 archivesBaseName = 'sdv-parser'
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
