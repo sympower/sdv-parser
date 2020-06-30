@@ -18,7 +18,7 @@ Maven dependency:
 <dependency>
     <groupId>net.sympower</groupId>
     <artifactId>sdv-parser</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -170,10 +170,10 @@ It uses Gradle (wrapper) for building.
 
 Build JAR:
 ```bash
-gradlew jar
+./gradlew jar
 ```
 
 Install in local Maven repository:
 ```bash
-gradlew install
+./gradlew publishToMavenLocal
 ```
