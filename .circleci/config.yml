@@ -69,3 +69,4 @@ workflows:
   workflow:
     jobs:
       - build
+          context: ArtifactRepository
