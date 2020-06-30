@@ -2,7 +2,7 @@
 Java parser for parsing SDV format (Semicolon Delimited Values).
 This format seems to be popular among European electricity system participants (e.g. NordPool price data).
 
-[![Build Status](https://travis-ci.org/sympower/sdv-parser.svg?branch=master)](https://travis-ci.org/sympower/sdv-parser)
+[![<Build Status>](https://circleci.com/gh/sympower/sdv-parser.svg?style=svg)](https://circleci.com/gh/sympower/sdv-parser)
 
 # Requirements
 
