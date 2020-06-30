@@ -30,7 +30,11 @@ jobs: # a collection of steps
             # Format the arguments to "./gradlew test"
             GRADLE_ARGS=$(echo $CLASSNAMES | awk '{for (i=1; i<=NF; i++) print "--tests",$i}')
             echo "Prepared arguments for Gradle: $GRADLE_ARGS"
-            ./gradlew test $GRADLE_ARGS
+            ./gradlew test \
+            -PsympowerMavenRepoPublicUrl=$MAVEN_REPO_URL \
+            -PsympowerMavenRepoUsername=$MAVEN_REPO_USER \
+            -PsympowerMavenRepoPassword=$MAVEN_REPO_PASS \
+            $GRADLE_ARGS
       - save_cache:
           paths:
             - ~/.gradle/wrapper
@@ -50,7 +54,11 @@ jobs: # a collection of steps
           command: |
             # Skip this for other nodes
             if [ "$CIRCLE_NODE_INDEX" == 0 ]; then
-              ./gradlew assemble
+              ./gradlew \
+                -PsympowerMavenRepoPublicUrl=$MAVEN_REPO_URL \
+                -PsympowerMavenRepoUsername=$MAVEN_REPO_USER \
+                -PsympowerMavenRepoPassword=$MAVEN_REPO_PASS \
+                assemble
             fi
       # As the JAR was only assembled in the first build container, build/libs will be empty in all the other build containers.
       - store_artifacts:
