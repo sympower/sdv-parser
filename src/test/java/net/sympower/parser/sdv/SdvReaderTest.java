@@ -1,6 +1,6 @@
 package net.sympower.parser.sdv;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -11,12 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SdvReaderTest {
 
@@ -24,20 +20,16 @@ public class SdvReaderTest {
   public void parseAllRowsIgnored() throws IOException {
     SdvReader sut = new SdvReader();
     List<?> results = sut.parse(getClass().getResource("prices.sdv"));
-    assertEquals(0, results.size());
+    assertThat(results.size()).isEqualTo(0);
   }
 
   @Test
   public void parseAllRowsNoneIgnored() throws IOException {
     SdvReader sut = new SdvReader();
     sut.setIgnoreUnknownRows(false);
-    try {
-      sut.parse(getClass().getResource("prices.sdv"));
-      fail("Should throw exception!");
-    }
-    catch (IllegalArgumentException e) {
-      assertEquals("Row type (ST) not registered, on row 'ST;2017;12;7;23;167;11:58;22.03.2017'", e.getMessage());
-    }
+    assertThatThrownBy(() -> sut.parse(getClass().getResource("prices.sdv")))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Row type (ST) not registered, on row 'ST;2017;12;7;23;167;11:58;22.03.2017'");
   }
 
   @Test
@@ -48,19 +40,19 @@ public class SdvReaderTest {
     List<LastUpdatedRow> results = sut.parse(getClass().getResource("lastUpdated.sdv"), LastUpdatedRow.class);
     Iterator<LastUpdatedRow> iterator = results.iterator();
     assertLastUpdatedRow(iterator);
-    assertFalse("Should not have more rows", iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should not have more rows").isFalse();
   }
 
   private void assertLastUpdatedRow(Iterator<?> iterator) {
-    assertTrue("Should have last updated row", iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should have last updated row").isTrue();
     LastUpdatedRow result = (LastUpdatedRow) iterator.next();
-    assertEquals(2017, result.year);
-    assertEquals(12, result.week);
-    assertEquals(7, result.day);
-    assertEquals(23, result.hour);
-    assertEquals(167, result.totalHours);
-    assertEquals(LocalTime.of(11, 58), result.time);
-    assertEquals(LocalDate.of(2017, 3, 22), result.date);
+    assertThat(result.year).isEqualTo(2017);
+    assertThat(result.week).isEqualTo(12);
+    assertThat(result.day).isEqualTo(7);
+    assertThat(result.hour).isEqualTo(23);
+    assertThat(result.totalHours).isEqualTo(167);
+    assertThat(result.time).isEqualTo(LocalTime.of(11, 58));
+    assertThat(result.date).isEqualTo(LocalDate.of(2017, 3, 22));
   }
 
   @Test
@@ -72,14 +64,14 @@ public class SdvReaderTest {
     assertAreaEquals("SP1", "SYSTEMPRICE", iterator);
     assertAreaEquals("BG", "Bulgaria", iterator);
     assertAreaEquals("FI", "Finland", iterator);
-    assertFalse("Should not have more rows", iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should not have more rows").isFalse();
   }
 
   private void assertAreaEquals(String alias, String desc, Iterator<?> iterator) {
-    assertTrue(String.format("Should have area with alias '%s' and description '%s'", alias, desc), iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should have area with alias '%s' and description '%s'", alias, desc).isTrue();
     AreaDescriptionRow result = (AreaDescriptionRow) iterator.next();
-    assertEquals(alias, result.alias);
-    assertEquals(desc, result.description);
+    assertThat(result.alias).isEqualTo(alias);
+    assertThat(result.description).isEqualTo(desc);
   }
 
   @Test
@@ -89,13 +81,13 @@ public class SdvReaderTest {
     List<?> results = sut.parse(getClass().getResource("lineCount.sdv"));
     Iterator<?> iterator = results.iterator();
     assertLineCountRow(223, iterator);
-    assertFalse("Should not have more rows", iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should not have more rows").isFalse();
   }
 
   private void assertLineCountRow(int lineCount, Iterator<?> iterator) {
-    assertTrue(String.format("Should have line count row with value %s", lineCount), iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should have line count row with value %s", lineCount).isTrue();
     LineCountRow result = (LineCountRow) iterator.next();
-    assertEquals(lineCount, result.count);
+    assertThat(result.count).isEqualTo(lineCount);
   }
 
   @Test
@@ -113,7 +105,7 @@ public class SdvReaderTest {
     assertAreaEquals("FI", "Finland", iterator);
     assertPriceRows(iterator);
     assertLineCountRow(223, iterator);
-    assertFalse("Should not have more rows", iterator.hasNext());
+    assertThat(iterator.hasNext()).as("Should not have more rows").isFalse();
   }
 
   @Test
@@ -121,19 +113,19 @@ public class SdvReaderTest {
     SdvReader sut = new SdvReader();
     sut.setDefaultLocale(new Locale("fi"));
     SpotPriceDocument doc = sut.parseDocument(getClass().getResource("prices.sdv"), SpotPriceDocument.class);
-    assertNotNull("Should have last updated row", doc.lastUpdated);
+    assertThat(doc.lastUpdated).as("Should have last updated row").isNotNull();
     assertLastUpdatedRow(Arrays.asList(doc.lastUpdated).iterator());
-    assertTrue("Last updated should have been set via a method call", doc.lastUpdatedSetViaMethod);
-    assertNotNull("Should have areas", doc.areas);
+    assertThat(doc.lastUpdatedSetViaMethod).as("Last updated should have been set via a method call").isTrue();
+    assertThat(doc.areas).as("Should have areas").isNotNull();
     Iterator<AreaDescriptionRow> areaIter = doc.areas.iterator();
     assertAreaEquals("FRE", "Finnish-Russian Exchange Bidding Area", areaIter);
     assertAreaEquals("FI", "Finland", areaIter);
-    assertFalse("Should not have more area rows", areaIter.hasNext());
+    assertThat(areaIter.hasNext()).as("Should not have more area rows").isFalse();
     Iterator<PricesRow> priceIter = doc.prices.iterator();
     assertPriceRows(priceIter);
-    assertTrue("Prices should have been added via a method call", doc.priceAddedViaMethod);
-    assertFalse("Should not have more price rows", priceIter.hasNext());
-    assertNotNull("Should have line count row", doc.lineCount);
+    assertThat(doc.priceAddedViaMethod).as("Prices should have been added via a method call").isTrue();
+    assertThat(priceIter.hasNext()).as("Should not have more price rows").isFalse();
+    assertThat(doc.lineCount).as("Should have line count row").isNotNull();
     assertLineCountRow(223, Arrays.asList(doc.lineCount).iterator());
   }
 
@@ -164,16 +156,19 @@ public class SdvReaderTest {
 
   private void assertPriceRowEquals(String code, int year, int week, int day, LocalDate date, String alias, String unit,
                                     BigDecimal[] hours, Iterator<?> iterator) {
-    assertTrue(String.format("Should have price row with code '%s', year %s, week %s, day %s, date %s, alias '%s', unit '%s'", code, year, week, day, date, alias, unit), iterator.hasNext());
+    assertThat(iterator.hasNext()).as(
+        "Should have price row with code '%s', year %s, week %s, day %s, date %s, alias '%s', unit '%s'",
+        code, year, week, day, date, alias, unit
+    ).isTrue();
     PricesRow result = (PricesRow) iterator.next();
-    assertEquals(code, result.code);
-    assertEquals(year, result.year);
-    assertEquals(week, result.week);
-    assertEquals(day, result.day);
-    assertEquals(date, result.date);
-    assertEquals(alias, result.alias);
-    assertEquals(unit, result.unit);
-    assertArrayEquals(hours, result.getHours());
+    assertThat(result.code).isEqualTo(code);
+    assertThat(result.year).isEqualTo(year);
+    assertThat(result.week).isEqualTo(week);
+    assertThat(result.day).isEqualTo(day);
+    assertThat(result.date).isEqualTo(date);
+    assertThat(result.alias).isEqualTo(alias);
+    assertThat(result.unit).isEqualTo(unit);
+    assertThat(result.getHours()).containsExactly(hours);
   }
 
 }
