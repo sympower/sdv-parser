@@ -34,6 +34,8 @@ jobs: # a collection of steps
             -PsympowerMavenRepoPublicUrl=$MAVEN_REPO_URL \
             -PsympowerMavenRepoUsername=$MAVEN_REPO_USER \
             -PsympowerMavenRepoPassword=$MAVEN_REPO_PASS \
+            -PsympowerMavenRepoSnapshotsUrl=not-used \
+            -PsympowerMavenRepoReleasesUrl=not-used \
             $GRADLE_ARGS
       - save_cache:
           paths:
@@ -58,6 +60,8 @@ jobs: # a collection of steps
                 -PsympowerMavenRepoPublicUrl=$MAVEN_REPO_URL \
                 -PsympowerMavenRepoUsername=$MAVEN_REPO_USER \
                 -PsympowerMavenRepoPassword=$MAVEN_REPO_PASS \
+                -PsympowerMavenRepoSnapshotsUrl=not-used \
+                -PsympowerMavenRepoReleasesUrl=not-used \
                 assemble
             fi
       # As the JAR was only assembled in the first build container, build/libs will be empty in all the other build containers.
