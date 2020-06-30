@@ -34,6 +34,10 @@ public abstract class AbstractNumberConverter<T extends Number> extends SdvTypeC
           fmt.getDecimalFormatSymbols().setGroupingSeparator(pattern.groupingSeparator().charAt(0));
         }
       }
+      // Workaround for similar issue https://bugs.openjdk.java.net/browse/JDK-8189097
+      if (value.startsWith("-")) {
+        fmt.setNegativePrefix("-");
+      }
       try {
         return parse(value, fmt);
       }

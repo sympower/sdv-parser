@@ -13,10 +13,6 @@ public class BigDecimalConverter extends AbstractNumberConverter<BigDecimal> {
 
   protected BigDecimal parse(String value, DecimalFormat fmt) throws ParseException {
     fmt.setParseBigDecimal(true);
-    // Workaround for similar issue https://bugs.openjdk.java.net/browse/JDK-8189097
-    if (value.startsWith("-")) {
-      fmt.setNegativePrefix("-");
-    }
     return (BigDecimal) fmt.parse(value);
   }
 
