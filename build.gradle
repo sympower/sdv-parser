@@ -81,8 +81,6 @@ gitVersioning {
 publishing {
     publications {
         "$project.name"(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
             from components.java
 
             // https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven:resolved_dependencies
